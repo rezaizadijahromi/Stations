@@ -147,3 +147,112 @@ int append_station(const char *filename, const char *id, const char *name)
     fclose(f);
     return 1;
 }
+
+int load_line(const char *filename, LineStopRec *out, int max_count, int *loaded_count)
+{
+
+    *loaded_count = 0;
+    FILE *f = fopen(filename, "rb");
+
+    if (!f)
+    {
+        perror("open");
+        return 0;
+    }
+
+    LineFileHeader hdr = {0};
+    if (fread(&hdr, sizeof(hdr), 1, f) != 1)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    if (hdr.magic != LINE_MAGIC)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    if (hdr.version != LINE_VER)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    if (hdr.count > STATIONS_MAX)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    uint32_t need = hdr.count;
+    if ((int)need > max_count)
+    {
+        need = (uint32_t)max_count;
+    }
+
+    size_t got = fread(out, sizeof(LineStopRec), need, f);
+    if (got != need)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    *loaded_count = (int)need;
+    fclose(f);
+    return 1;
+}
+
+int append_line_stop(const char *filename, const char *id, const char *name)
+{
+    FILE *f = fopen(filename, "r+b");
+    uint32_t count = 0;
+
+    if (!f)
+    {
+        f = fopen(filename, "wb");
+        if (!f)
+        {
+            return 0;
+        }
+        if (write_header(f, 0))
+        {
+            fclose(f);
+            return 0;
+        }
+        f = fopen(filename, "r+b");
+        if (!f)
+            return 0;
+    }
+
+    LineFileHeader hdr = {0};
+    if (fread(&hdr, sizeof hdr, 1, f) != 1)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    if (hdr.magic != LINE_MAGIC || hdr.version != LINE_VER)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    if (hdr.count >= STATIONS_MAX)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    count = hdr.count;
+
+    long data_off = (long)sizeof(LineFileHeader) + (long)count * (long)sizeof(LineStopRec);
+    if (fseek(f, data_off, SEEK_SET) != 0)
+    {
+        fclose(f);
+        return 0;
+    }
+
+    LineStopRec line;
+    copy_padded(line.station_id, LINE);
+}
