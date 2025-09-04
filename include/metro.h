@@ -1,7 +1,6 @@
 #ifndef METRO_H
 #define METRO_H
 
-#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
