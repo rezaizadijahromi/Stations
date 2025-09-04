@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-
 #include "utils.h"
 
 #ifdef _WIN32
@@ -48,4 +45,15 @@ int utils_has_file_in_dir(const char *dir, const char *filename)
     if (utils_join_path(path, sizeof path, dir, filename) != 0)
         return 0;
     return utils_file_exists_readable(path);
+}
+
+void utils_sanitize_single_line(char *s)
+{
+    if (!s)
+        return;
+    for (; *s; s++)
+    {
+        if (*s == '\n' || *s == '\r' || *s == '\t')
+            *s = ' ';
+    }
 }
