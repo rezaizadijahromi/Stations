@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "../include/utils.h"
 
 #ifdef _WIN32
 #define UTILS_IS_SEP(c) ((c) == '\\' || (c) == '/')

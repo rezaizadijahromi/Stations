@@ -1,5 +1,6 @@
-#include "include/metro.h"
-#include "include/utils.h"
+#include "../include/metro.h"
+// Make sure utils.h exists in the include path or adjust the path accordingly
+#include "../include/utils.h"
 
 int append_station(const char *filename, const char *id, const char *name)
 {
