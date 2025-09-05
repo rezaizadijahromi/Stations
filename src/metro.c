@@ -1,5 +1,4 @@
 #include "../include/metro.h"
-// Make sure utils.h exists in the include path or adjust the path accordingly
 #include "../include/utils.h"
 
 int append_station(const char *filename, const char *id, const char *name)
@@ -20,5 +19,29 @@ int append_station(const char *filename, const char *id, const char *name)
         fclose(f);
         return -3;
     }
+    long sz = ftell(f);
+    if (sz == 0)
+    {
+        fprintf(f, "id\tname\n");
+    }
+
+    char buf[STATION_NAME_MAX + 1];
+    size_t i = 0;
+    while (i < STATION_NAME_MAX && name[i])
+    {
+        buf[i] = name[i];
+        i++;
+    }
+    buf[i] = '\0';
+    utils_sanitize_single_line(buf);
+
+    if (fprintf(f, "%u\t%s\n", (unsigned)id, buf) < 0)
+    {
+        fclose(f);
+        return -5;
+    }
+
+    fclose(f);
+
     return 0;
 }
