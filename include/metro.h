@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #define STATION_NAME_MAX 100
 
@@ -13,6 +14,6 @@ typedef struct
     char station_name[STATION_NAME_MAX];
 } Station;
 
-int append_station(const char *filename, const char *id, const char *name);
+int append_station(const char *filename, uint16_t *id, const char *name);
 
 #endif

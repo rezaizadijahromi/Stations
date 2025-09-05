@@ -1,10 +1,13 @@
 #include "../include/metro.h"
 #include "../include/utils.h"
 
-int append_station(const char *filename, const char *id, const char *name)
+int append_station(const char *filename, uint16_t *id, const char *name)
 {
     if (!filename || !name || !id)
         return -1;
+
+    // TODO: Create a function for this
+    *id = *id + 1;
 
     if (!utils_has_file_in_dir(".", filename))
     {
@@ -35,7 +38,7 @@ int append_station(const char *filename, const char *id, const char *name)
     buf[i] = '\0';
     utils_sanitize_single_line(buf);
 
-    if (fprintf(f, "%u\t%s\n", (unsigned)id, buf) < 0)
+    if (fprintf(f, "%" PRIu16 "\t%s\n", (unsigned)*id, buf) < 0)
     {
         fclose(f);
         return -5;
