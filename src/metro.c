@@ -13,5 +13,12 @@ int append_station(const char *filename, const char *id, const char *name)
     }
 
     FILE *f = fopen(filename, "a+");
+
+    // write header
+    if (fseek(f, 0, SEEK_END) != 0)
+    {
+        fclose(f);
+        return -3;
+    }
     return 0;
 }
