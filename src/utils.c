@@ -75,50 +75,75 @@ int utils_get_last_station_id(const char *filename, uint16_t *last_id)
         fclose(f);
         return -1;
     }
-    long sz = ftell(f);
-    if (sz <= 0)
+    long pos = ftell(f);
+    if (pos <= 0)
     {
         fclose(f);
         *last_id = 0;
         return 0;
     }
 
-    if (fseek(f, 0, SEEK_SET) != 0)
+    while (pos > 0)
+    {
+        if (fseek(f, --pos, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return -1;
+        }
+        int ch = fgetc(f);
+        if (ch != '\n' && ch != '\r')
+            break;
+    }
+
+    while (pos > 0)
+    {
+        if (fseek(f, --pos, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return -1;
+        }
+
+        int ch = fgetc(f);
+        if (ch == '\n')
+        {
+            pos++;
+            break;
+        }
+    }
+
+    if (fseek(f, pos, SEEK_SET) != 0)
     {
         fclose(f);
         return -1;
     }
 
     char line[512];
-    uint16_t last = 0;
-    int found = 0;
 
-    while (fgets(line, sizeof line, f))
+    if (fgets(line, sizeof line, f))
     {
-        char *p = line;
-        while (*p == ' ' || *p == '\t')
-            ++p;
+        fclose(f);
+        *last_id = 0;
+        return 0;
+    }
+    fclose(f);
 
-        if (!isdigit((unsigned char)*p))
-            continue;
-
-        char *ends = NULL;
-
-        unsigned long v = strtoul(p, NULL, 10);
-        if (v <= 0xFFFFUL && ends != p)
-        {
-            last = (uint16_t)v;
-            found = 1;
-        }
+    char *p = line;
+    while (*p == ' ' || *p == '\t')
+        ++p;
+    if (!isdigit((unsigned char)*p))
+    {
+        last_id = 0;
+        return 0;
     }
 
-    fclose(f);
-    if (!found)
+    int errno = 0;
+    unsigned long v = strtoul(p, NULL, 10);
+    if (errno || v > 65635)
     {
         *last_id = 0;
         return 0;
     }
 
-    *last_id = last;
+    *last_id = (uint16_t)v;
     return 1;
 }
