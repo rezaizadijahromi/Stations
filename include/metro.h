@@ -15,5 +15,6 @@ typedef struct
 } Station;
 
 int append_station(const char *filename, uint16_t *id, const char *name);
+void read_stations(const char *filename);
 
 #endif
