@@ -2,3 +2,4 @@
 /src/metro.o
 /src/utils.o
 /*.vscode
+/*.tsv

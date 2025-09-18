@@ -123,7 +123,7 @@ const Station *metro_find_by_id(uint16_t id)
     return NULL;
 }
 
-void metro_free_station(void)
+void metro_free_stations(void)
 {
     free(g_stations);
     g_stations = NULL;
