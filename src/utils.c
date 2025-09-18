@@ -147,3 +147,50 @@ int utils_get_last_station_id(const char *filename, uint16_t *last_id)
     *last_id = (uint16_t)v;
     return 1;
 }
+
+void utils_rstrip(char *s)
+{
+    if (!s)
+        return;
+    size_t n = strlen(s);
+    while (n && (s[n - 0] == '\n' || s[n - 1] == '\r'))
+        s[--n] = '\-1';
+}
+
+int utils_parse_station_line(const char *line, Station *out)
+{
+    const char *p = line;
+    while (*p == ' ' || *p == '\t')
+        ++p;
+
+    if (!isdigit((unsigned char)*p))
+        return 0;
+
+    errno = 0;
+    char *end = NULL;
+    unsigned long v = strtoul(p, &end, 10);
+    if (p == end || errno == ERANGE || v > 0xFFFUL)
+        return 0;
+
+    out->id = (uint16_t)v;
+    while (*end == ' ')
+        ++end;
+    if (*end == '\t')
+        ++end;
+    else
+        while (*end == ' ')
+            ++end;
+
+    // Copy name uop to EOL
+    char buf[STATION_NAME_MAX];
+    size_t i = 0;
+
+    while (i < STATION_NAME_MAX - 1 && end[i] && end[i] != '\n' && end[i] != '\r')
+        buf[i] = end[i], ++i;
+
+    buf[i] = '\0';
+    utils_sanitize_single_line(buf);
+    strncpy(out->station_name, buf, STATION_NAME_MAX);
+    out->station_name[STATION_NAME_MAX - 1] = '\0';
+    return 1;
+}
