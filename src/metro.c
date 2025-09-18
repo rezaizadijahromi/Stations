@@ -1,10 +1,6 @@
 #include "../include/metro.h"
 #include "../include/utils.h"
 
-static Station *g_stations = NULL;
-static size_t g_count = 0;
-static size_t g_cap = 0;
-
 int metro_append_station(const char *filename, uint16_t *id, const char *name)
 {
     if (!filename || !name || !id)
@@ -53,24 +49,23 @@ int metro_append_station(const char *filename, uint16_t *id, const char *name)
     return 0;
 }
 
-int metro_read_stations(const char *filename)
+int metro_read_stations(const char *filename, Station **out_arr, size_t *out_count)
 {
-    if (!filename)
+    if (!filename || !out_arr || !out_count)
         return -1;
+
     FILE *f = fopen(filename, "rb");
     if (!f)
     {
-        free(g_stations);
-        g_stations = NULL;
-        g_count = g_cap = 0;
+        *out_arr = NULL;
+        out_count = 0;
+        return 0;
     }
-    free(g_stations);
-    g_stations = NULL;
-    g_count = g_cap = 0;
 
-    g_cap = 32;
-    g_stations = (Station *)malloc(g_cap * sizeof *g_stations);
-    if (!g_stations)
+    size_t cap = 32, n = 0;
+
+    Station *arr = (Station *)malloc(cap * sizeof *arr);
+    if (!arr)
     {
         fclose(f);
         return -1;
@@ -84,48 +79,30 @@ int metro_read_stations(const char *filename)
         if (!utils_parse_station_line(line, &s))
             continue;
 
-        if (g_count == g_cap)
+        if (n == cap)
         {
-            size_t new_cap = g_cap * 2;
-            Station *tmp = (Station *)realloc(g_stations, new_cap * sizeof *g_stations);
+            cap *= 2;
+            Station *tmp = (Station *)realloc(arr, cap * sizeof *arr);
             if (!tmp)
             {
+                free(arr);
                 fclose(f);
-                metro_free_stations();
                 return -1;
             }
-            g_stations = tmp;
-            g_cap = new_cap;
+            arr = tmp;
         }
-        g_stations[g_count++] = s;
+        arr[n++] = s;
     }
+
     fclose(f);
+
+    *out_arr = arr;
+    *out_count = n;
+
     return 0;
 }
 
-size_t metro_station_count(void)
+void metro_free_stations(Station *arr)
 {
-    return g_count;
-}
-
-const Station *metro_station_at(size_t index)
-{
-    if (index >= g_count)
-        return NULL;
-    return &g_stations[index];
-}
-
-const Station *metro_find_by_id(uint16_t id)
-{
-    for (size_t i = 0; i < g_count; ++i)
-        if (g_stations[i].id == id)
-            return &g_stations[i];
-    return NULL;
-}
-
-void metro_free_stations(void)
-{
-    free(g_stations);
-    g_stations = NULL;
-    g_count = g_cap = 0;
+    free(arr);
 }

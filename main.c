@@ -3,7 +3,10 @@
 int main()
 {
 
-    if (metro_read_stations("stations.tsv") != 0)
+    Station *stations = NULL;
+    size_t n = 0;
+
+    if (metro_read_stations("stations.tsv", &stations, &n) != 0)
     {
         uint16_t id_index = 0;
         metro_append_station("stations.tsv", &id_index, "Centrale");
@@ -12,15 +15,12 @@ int main()
     }
     else
     {
-        printf("Load %zu stations\n", metro_station_count());
-        for (size_t i = 0; i < metro_station_count(); i++)
+        for (size_t i = 0; i < n; i++)
         {
-            const Station *s = metro_station_at(i);
-            printf("%u\t%s\n", (unsigned)s->id, s->station_name);
+            printf("%u\t%s\n", (unsigned)stations[i].id, stations[i].station_name);
         }
-
-        metro_free_stations();
     }
+    metro_free_stations(stations);
 
     return 0;
 }
