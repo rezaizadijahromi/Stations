@@ -136,7 +136,7 @@ int utils_get_last_station_id(const char *filename, uint16_t *last_id)
         return 0;
     }
 
-    int errno = 0;
+    errno = 0;
     unsigned long v = strtoul(p, NULL, 10);
     if (errno || v > 65635)
     {

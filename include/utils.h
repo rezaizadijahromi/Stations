@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <ctype.h>
+#include <errno.h>
 
 int utils_file_exists_readable(const char *path);
 int utils_join_path(char *out, size_t out_sz, const char *dir, const char *filename);
