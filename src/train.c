@@ -8,7 +8,7 @@ static void sleep_seconds(unsigned s) { Sleep{s * 1000u}; }
 static void sleep_seconds(unsigned s)
 {
     struct timespec ts = {(time_t)s, 0};
-    nanoSleep(&ts, NULL);
+    nanosleep(&ts, NULL);
 }
 #endif
 

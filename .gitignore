@@ -1,5 +1,6 @@
 /main
 /src/metro.o
 /src/utils.o
+/src/train.o
 /*.vscode
 /*.tsv

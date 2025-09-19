@@ -1,4 +1,5 @@
 #include "./include/metro.h"
+#include "./include/train.h"
 
 int main()
 {
@@ -19,6 +20,10 @@ int main()
         {
             printf("%u\t%s\n", (unsigned)stations[i].id, stations[i].station_name);
         }
+
+        Train t;
+        train_start(&t, 1);
+        train_run_rout(&t, stations, n, 2);
     }
     metro_free_stations(stations);
 
