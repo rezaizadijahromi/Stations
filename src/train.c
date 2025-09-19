@@ -21,3 +21,22 @@ int train_move_next(Train *t, size_t n)
     }
     return 0;
 }
+
+void train_run_rout(Train *t, const Station *rout, size_t n, unsigned seconds)
+{
+    if (!rout || n == 0)
+        return;
+
+    const Station *cur = train_current(t, rout, n);
+    if (cur)
+    {
+        printf("train %u at station: %s (id=%u)\n", (unsigned)t->id, cur->station_name, (unsigned)cur->id);
+    }
+
+    while (train_move_next(t, n))
+    {
+        sleep_seconds(seconds);
+        cur = train_current(t, rout, n);
+        printf("train %u at station: %s (id=%u)\n", (unsigned)t->id, cur->station_name, (unsigned)cur->id);
+    }
+}
