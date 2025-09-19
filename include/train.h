@@ -22,4 +22,4 @@ static inline const Station *train_current(const Train *t, const Station *rout, 
 }
 
 int train_move_next(Train *t, size_t n);
-void train_run_rout(Train *t, const Station *rout, size_t n, unsigned seconds);
+void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds);

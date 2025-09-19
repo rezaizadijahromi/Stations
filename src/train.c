@@ -22,7 +22,7 @@ int train_move_next(Train *t, size_t n)
     return 0;
 }
 
-void train_run_rout(Train *t, const Station *rout, size_t n, unsigned seconds)
+void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds)
 {
     if (!rout || n == 0)
         return;

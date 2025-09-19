@@ -1,31 +1,49 @@
 #include "./include/metro.h"
 #include "./include/train.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-int main()
+int main(void)
 {
-
     Station *stations = NULL;
     size_t n = 0;
 
-    if (metro_read_stations("stations.tsv", &stations, &n) != 0)
+    int rc = metro_read_stations("stations.tsv", &stations, &n);
+    if (rc != 0)
     {
-        uint16_t id_index = 0;
-        metro_append_station("stations.tsv", &id_index, "Centrale");
-        metro_append_station("stations.tsv", &id_index, "Gessate");
-        metro_append_station("stations.tsv", &id_index, "Cernusco");
+        fprintf(stderr, "Failed to read stations.tsv (rc=%d)\n", rc);
+        return 1;
     }
-    else
+
+    if (n == 0)
     {
-        for (size_t i = 0; i < n; i++)
+        uint16_t id_index = 1;
+        if (metro_append_station("stations.tsv", &id_index, "Centrale") != 0)
+            return 1;
+        if (metro_append_station("stations.tsv", &id_index, "Gessate") != 0)
+            return 1;
+        if (metro_append_station("stations.tsv", &id_index, "Cernusco") != 0)
+            return 1;
+
+        if (metro_read_stations("stations.tsv", &stations, &n) != 0)
+            return 1;
+        if (n == 0)
         {
-            printf("%u\t%s\n", (unsigned)stations[i].id, stations[i].station_name);
+            fprintf(stderr, "Still empty after append?\n");
+            return 1;
         }
-
-        Train t;
-        train_start(&t, 1);
-        train_run_rout(&t, stations, n, 2);
     }
-    metro_free_stations(stations);
 
+    for (size_t i = 0; i < n; ++i)
+    {
+        printf("%u\t%s\n",
+               (unsigned)stations[i].id, stations[i].station_name);
+    }
+
+    Train t;
+    train_start(&t, 1);
+    train_run_route(&t, stations, n, 2);
+
+    free(stations);
     return 0;
 }
