@@ -22,6 +22,29 @@ int train_move_next(Train *t, size_t n)
     return 0;
 }
 
+void train_task(void *ctx_v)
+{
+    TrainCtx *ctx = (TrainCtx *)ctx_v;
+
+    if (ctx->t->index >= ctx->n)
+    {
+        *(ctx->done_flag) = 1;
+        return;
+    }
+
+    const Station *s = &ctx->route[ctx->t->index];
+    printf("Train %u at: %s (station id=%u)\n", (unsigned)ctx->t->id, s->station_name, (unsigned)s->id);
+
+    ctx->t->index++;
+
+    if (ctx->t->index >= ctx->n)
+    {
+        *(ctx->done_flag) = 1;
+    }
+}
+
+int train_stop_when_done(void *p) { return *(int *)p; }
+
 void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds)
 {
     if (!rout || n == 0)

@@ -78,7 +78,7 @@ int main(void)
     os_init(&sched);
     os_add(&sched, train_task, &ctx, 2000);
 
-    os_run_until(&sched, stop_when_done, &done);
+    os_run_until(&sched, train_stop_when_done, &done);
 
     os_free(&sched);
     free(stations);
