@@ -1,19 +1,21 @@
+#define _POSIX_C_SOURCE 200809L
 #include "../include/os.h"
+
+#include <stdlib.h>
 
 #ifdef _WIN32
 #include <windows.h>
+/* Platform helpers: "now" in ms and a sleep function in ms */
 static uint64_t now_ms(void) { return GetTickCount64(); }
-static void sleep_ms(unsigned ms) { sleep(ms); }
+static void sleep_ms(unsigned ms) { Sleep(ms); }
 #else
 #include <time.h>
-#include <linux/time.h>
 static uint64_t now_ms(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
-
 static void sleep_ms(unsigned ms)
 {
     struct timespec ts = {ms / 1000, (ms % 1000) * 1000000L};
@@ -45,7 +47,7 @@ static int ensure_cap(OsScheduler *s, size_t need)
     return 0;
 }
 
-void os_add(OsScheduler *s, OsTaskFn fn, void *ctx, uint32_t period_ms)
+int os_add(OsScheduler *s, OsTaskFn fn, void *ctx, uint32_t period_ms)
 {
     if (ensure_cap(s, s->count + 1) != 0)
         return -1;

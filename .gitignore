@@ -2,5 +2,6 @@
 /src/metro.o
 /src/utils.o
 /src/train.o
+/src/os.o
 /*.vscode
 /*.tsv

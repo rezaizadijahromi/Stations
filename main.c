@@ -1,7 +1,9 @@
 #include "./include/metro.h"
 #include "./include/train.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "./include/os.h"
+
+// #include <stdio.h>
+// #include <stdlib.h>
 
 int main(void)
 {
@@ -25,9 +27,7 @@ int main(void)
         if (metro_append_station("stations.tsv", &id_index, "Cernusco") != 0)
             return 1;
 
-        if (metro_read_stations("stations.tsv", &stations, &n) != 0)
-            return 1;
-        if (n == 0)
+        if (metro_read_stations("stations.tsv", &stations, &n) != 0 || n == 0)
         {
             fprintf(stderr, "Still empty after append?\n");
             return 1;
@@ -40,10 +40,18 @@ int main(void)
                (unsigned)stations[i].id, stations[i].station_name);
     }
 
-    Train t;
-    train_start(&t, 1);
-    train_run_route(&t, stations, n, 2);
+    Train t = {.id = 1, .index = 0};
+    int done = 0;
+    TrainCtx ctx = {.t = &t, .route = stations, .n = n, .done_flag = &done};
 
+    OsScheduler sched;
+    os_init(&sched);
+    os_add(&sched, train_task, &ctx, 2000);
+
+    os_run_until(&sched, stop_when_done, &done);
+
+    os_free(&sched);
     free(stations);
+
     return 0;
 }
