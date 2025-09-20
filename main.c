@@ -19,15 +19,45 @@ int main(void)
 
     if (n == 0)
     {
-        uint16_t id_index = 1;
-        if (metro_append_station("stations.tsv", &id_index, "Centrale") != 0)
+        uint16_t id_index = 0;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Cascina Gobba") != 0)
             return 1;
-        if (metro_append_station("stations.tsv", &id_index, "Gessate") != 0)
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Crescenzago") != 0)
             return 1;
-        if (metro_append_station("stations.tsv", &id_index, "Cernusco") != 0)
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Cimiano") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Udine") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Lambrate FS") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Piola") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Loreto") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Caiazzo") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Centrale FS") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Gioia") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Garibaldi FS") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Moscova") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Lanza") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Cadorna FN") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Sant'Ambrogio") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Sant'Agostino") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Porta Genova FS") != 0)
+            return 1;
+        if (metro_append_station("green_line_stations.tsv", &id_index, "Romolo") != 0)
             return 1;
 
-        if (metro_read_stations("stations.tsv", &stations, &n) != 0 || n == 0)
+        if (metro_read_stations("green_line_stations.tsv", &stations, &n) != 0 || n == 0)
         {
             fprintf(stderr, "Still empty after append?\n");
             return 1;
