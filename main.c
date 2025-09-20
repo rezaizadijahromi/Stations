@@ -75,9 +75,9 @@ int main(void)
     Train t3 = {.id = 3, .index = 0};
 
     TrainCtx ctxs[] = {
-        {.t = &t1, .route = stations, .n = n, .period_ms = 1500, .starting_index = 0, .loop = 0},
-        {.t = &t2, .route = stations, .n = n, .period_ms = 1000, .starting_index = 3, .loop = 0},
-        {.t = &t3, .route = stations, .n = n, .period_ms = 2000, .starting_index = 6, .loop = 0}};
+        {.t = &t1, .route = stations, .n = n, .period_ms = 1, .starting_index = 0, .loop = 0},
+        {.t = &t2, .route = stations, .n = n, .period_ms = 2, .starting_index = 3, .loop = 0},
+        {.t = &t3, .route = stations, .n = n, .period_ms = 3, .starting_index = 6, .loop = 0}};
 
     const size_t T = sizeof ctxs / sizeof ctxs[0];
 
@@ -97,17 +97,6 @@ int main(void)
 
     for (size_t i = 0; i < T; i++)
         pthread_join(tids[i], NULL);
-
-    int done = 0;
-
-    OsScheduler sched;
-    os_init(&sched);
-    for (size_t i = 0; i < sizeof(ctxs) / sizeof(ctxs[0]); i++)
-    {
-        os_add(&sched, train_task, &ctxs[i], 2000);
-        os_run_until(&sched, train_stop_when_done, &done);
-    }
-    os_free(&sched);
 
     pthread_mutex_destroy(&g_print_mx);
     free(stations);
