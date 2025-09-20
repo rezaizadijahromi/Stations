@@ -43,8 +43,6 @@ void train_task(void *ctx_v)
     }
 }
 
-int train_stop_when_done(void *p) { return *(int *)p; }
-
 void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds)
 {
     if (!rout || n == 0)
@@ -62,4 +60,38 @@ void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds)
         cur = train_current(t, rout, n);
         printf("train %u at station: %s (id=%u)\n", (unsigned)t->id, cur->station_name, (unsigned)cur->id);
     }
+}
+
+int train_stop_when_done(void *p) { return *(int *)p; }
+
+void *train_thread(void *args)
+{
+    TrainCtx *ctx = (TrainCtx *)args;
+    if (ctx->n == 0)
+        return NULL;
+
+    ctx->t->index = (ctx->starting_index < ctx->n) ? ctx->starting_index : 0;
+
+    do
+    {
+        pthread_mutex_lock(&g_print_mx);
+        const Station *s = &ctx->route[ctx->t->index];
+        printf("Train %u at: %s (station id=%u, index=%zu)\n", (unsigned)ctx->t->id, s->station_name, (unsigned)s->id, ctx->t->index);
+
+        fflush(stdout);
+        pthread_mutex_unlock(&g_print_mx);
+
+        sleep_seconds(ctx->period_ms);
+
+        ctx->t->index++;
+        if (ctx->t->index >= ctx->n)
+        {
+            if (ctx->loop)
+                ctx->t->index = 0;
+            else
+                break;
+        }
+    } while (1);
+
+    return NULL;
 }

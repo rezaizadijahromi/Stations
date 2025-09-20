@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <pthread.h>
+
 #include "metro.h"
 
 typedef struct
@@ -15,8 +17,13 @@ typedef struct
     Train *t;
     const Station *route;
     size_t n; // Number of stations
+    unsigned period_ms;
+    size_t starting_index;
+    int loop; // 0 = stop
     int *done_flag;
 } TrainCtx;
+
+static pthread_mutex_t g_print_mx = PTHREAD_MUTEX_INITIALIZER;
 
 static inline void
 train_start(Train *t, uint16_t id)
@@ -36,3 +43,4 @@ void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds);
 // Tasks
 void train_task(void *ctx_v);
 int train_stop_when_done(void *p);
+void *train_thread(void *args);
