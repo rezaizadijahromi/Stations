@@ -194,3 +194,41 @@ int utils_parse_station_line(const char *line, Station *out)
     out->station_name[STATION_NAME_MAX - 1] = '\0';
     return 1;
 }
+
+int utils_parse_line(const char *line, Line *out)
+{
+    const char *p = line;
+    while (*p == ' ' || *p == '\t')
+        ++p;
+
+    if (!isdigit((unsigned char)*p))
+        return 0;
+
+    errno = 0;
+    char *end = NULL;
+    unsigned long v = strtoul(p, &end, 10);
+    if (p == end || errno == ERANGE || v > 0xFFFUL)
+        return 0;
+
+    out->id = (uint16_t)v;
+    while (*end == ' ')
+        ++end;
+    if (*end == '\t')
+        ++end;
+    else
+        while (*end == ' ')
+            ++end;
+
+    // Copy name uop to EOL
+    char buf[LINE_NAME_MAX];
+    size_t i = 0;
+
+    while (i < LINE_NAME_MAX - 1 && end[i] && end[i] != '\n' && end[i] != '\r')
+        buf[i] = end[i], ++i;
+
+    buf[i] = '\0';
+    utils_sanitize_single_line(buf);
+    strncpy(out->line_name, buf, LINE_NAME_MAX);
+    out->line_name[LINE_NAME_MAX - 1] = '\0';
+    return 1;
+}

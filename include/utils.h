@@ -15,3 +15,5 @@ int utils_get_last_station_id(const char *filename, uint16_t *last_id);
 
 void utils_rstrip(char *s);
 int utils_parse_station_line(const char *line, Station *out);
+
+int utils_parse_line(const char *line, Line *out);

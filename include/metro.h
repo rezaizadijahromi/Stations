@@ -7,6 +7,7 @@
 #include <inttypes.h>
 
 #define STATION_NAME_MAX 100
+#define LINE_NAME_MAX 20
 
 typedef struct
 {
@@ -14,8 +15,25 @@ typedef struct
     char station_name[STATION_NAME_MAX];
 } Station;
 
+typedef struct
+{
+    uint16_t id;
+    char line_name[LINE_NAME_MAX];
+} Line;
+
+typedef struct
+{
+    uint16_t line_id;
+    uint16_t order_id;
+    uint16_t station_id;
+} LineStop;
+
 int metro_append_station(const char *filename, uint16_t *id, const char *name);
 int metro_read_stations(const char *filename, Station **out_arr, size_t *out_size);
 void metro_free_stations(Station *arr);
+
+int metro_append_line(const char *filename, uint16_t *id, const char *name);
+int metro_read_lines(const char *filename, Line **out_arr, size_t *out_size);
+void metro_free_Lines(Line *arr);
 
 #endif
