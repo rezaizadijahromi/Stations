@@ -232,3 +232,24 @@ int utils_parse_line(const char *line, Line *out)
     out->line_name[LINE_NAME_MAX - 1] = '\0';
     return 1;
 }
+
+int utils_write_header(FILE *f, const char *header)
+{
+    if (!f || !header)
+        return -1;
+
+    if (fseek(f, 0, SEEK_END) != 0)
+    {
+        fclose(f);
+        return -1;
+    }
+    long sz = ftell(f);
+    if (sz < 0)
+        return -1;
+    if (sz == 0)
+    {
+        if (fprintf(f, "%s\n", header) < 0)
+            return -1;
+    }
+    return 0;
+}

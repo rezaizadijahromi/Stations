@@ -17,3 +17,4 @@ void utils_rstrip(char *s);
 int utils_parse_station_line(const char *line, Station *out);
 
 int utils_parse_line(const char *line, Line *out);
+int utils_write_header(FILE *f, const char *header);
