@@ -34,6 +34,10 @@ void metro_free_stations(Station *arr);
 
 int metro_append_line(const char *filename, uint16_t *id, const char *name);
 int metro_read_lines(const char *filename, Line **out_arr, size_t *out_size);
+int metro_find_line_id_by_name(const Line *lines, size_t n, const char *name, uint16_t *out_id);
+int metro_ensure_line(const char *filename, const char *line_name, uint16_t *out_id);
 void metro_free_Lines(Line *arr);
+
+int metro_read_line_stops(const char *filename, LineStop **out_arr, size_t *out_size);
 
 #endif

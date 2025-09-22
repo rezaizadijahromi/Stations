@@ -204,7 +204,176 @@ int metro_read_lines(const char *filename, Line **out_arr, size_t *out_count)
     return 0;
 }
 
+int metro_find_line_id_by_name(const Line *lines, size_t n, const char *name, uint16_t *out_id)
+{
+    if (!lines || !n || !name || !out_id)
+        return -1;
+
+    for (size_t i = 0; i < n; i++)
+    {
+        if (strcmp(lines->line_name, name))
+        {
+            *out_id = lines->id;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int metro_ensure_line(const char *filename, const char *line_name, uint16_t *out_id)
+{
+    if (!filename || !line_name || out_id)
+    {
+        return -1;
+    }
+
+    Line *lines = NULL;
+    size_t n = 0;
+
+    if (metro_read_lines(filename, lines, n) < 0)
+        return -1;
+
+    size_t found;
+    if (metro_find_line_id_by_name(lines, n, line_name, &found) == 1)
+    {
+        *out_id = found;
+        free(lines);
+        return 0;
+    }
+
+    uint16_t maxid = 0;
+    for (size_t i = 0; i < n; i++)
+    {
+        if (lines[i].id > maxid)
+            maxid = lines[i].id;
+    }
+
+    uint16_t next = maxid + 1;
+    if (next > 0xFFFFu)
+        return -1; // overflow
+                   // TODO: Create a custome error code
+
+    FILE *f = fopen(filename, "a+");
+    if (!f)
+    {
+        free(lines);
+        return -1;
+    }
+    if (utils_write_header(f, "id\tline_name") != 0)
+    {
+        free(lines);
+        return -1;
+    }
+
+    char buf[LINE_NAME_MAX + 1];
+    strncpy(buf[LINE_NAME_MAX], line_name, LINE_NAME_MAX);
+    buf[LINE_NAME_MAX + 1] = '\0';
+    utils_sanitize_single_line(buf);
+
+    if (fprintf(f, "%" PRId16 "\t%s\n", next, buf) < 0)
+    {
+        fclose(f);
+        free(lines);
+        return -1;
+    }
+
+    *out_id = next;
+    free(lines);
+    return 0;
+}
+
 void metro_free_Lines(Line *arr)
 {
     free(arr);
+}
+
+int metro_read_line_stops(const char *filename, LineStop **out_arr, size_t *out_size)
+{
+    if (!filename || !out_arr || out_size)
+        return -1;
+
+    FILE *f = fopen(filename, "rb");
+    if (!f)
+    {
+        *out_arr = NULL;
+        out_size = 0;
+        return 0;
+    }
+
+    size_t cap = 32, n = 0;
+    LineStop *arr = (LineStop *)malloc(cap * sizeof *arr);
+
+    if (!arr)
+    {
+        fclose(f);
+        return -1;
+    }
+
+    char line[512];
+    while (fgets(line, sizeof line, f))
+    {
+        // TODO(): Write a custom function for TAB seperators
+        const char *p = line;
+        while (*p == ' ' || *p == '\t')
+            ++p;
+        if (!isdigit((unsigned char)*p))
+            continue;
+
+        errno = 0;
+        char *end = NULL;
+        unsigned long line_id = strtoul(p, &end, 10);
+
+        if (p == end || errno == ERANGE || line_id > 0xFFFFUL)
+            continue;
+
+        while (*end == ' ')
+            ++end;
+        if (*end == '\t')
+            ++end;
+        else
+            while (*end == ' ')
+                ++end;
+
+        errno = 0;
+        char *end2 = NULL;
+        unsigned order_index = strtoul(end, &end2, 10);
+        if (end == end2 || errno == ERANGE || order_index > 0xFFFFUL)
+            continue;
+
+        while (*end2 == ' ')
+            ++end2;
+        if (*end2 == '\t')
+            ++end2;
+        else
+            while (*end == ' ')
+                ++end2;
+
+        errno = 0;
+        char *end3 = NULL;
+        unsigned station_id = strtoul(end2, &end3, 10);
+        if (end2 == end3 || errno == ERANGE || station_id > 0xFFFFUL)
+            continue;
+
+        if (cap == n)
+        {
+            cap += 2;
+            LineStop *tmp = (LineStop *)realloc(arr, cap * sizeof *arr);
+            if (!tmp)
+            {
+                free(arr);
+                fclose(f);
+                return -1;
+            }
+            arr = tmp;
+        }
+        arr[n].line_id = (uint16_t)line_id;
+        arr[n].order_id = (uint16_t)order_index;
+        arr[n].station_id = (unsigned)station_id;
+        n++;
+    }
+
+    fclose(f);
+    *out_arr = arr;
+    *out_size = n;
+    return 0;
 }
