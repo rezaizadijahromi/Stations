@@ -377,3 +377,52 @@ int metro_read_line_stops(const char *filename, LineStop **out_arr, size_t *out_
     *out_size = n;
     return 0;
 }
+
+void metro_free_line_stops(LineStop *p) { free(p); }
+
+int metro_line_order_taken(const LineStop *stops, size_t n, uint16_t line_id, uint16_t order_index)
+{
+    for (size_t i = 0; i < n; i++)
+    {
+        if (stops[i].order_id == order_index && stops[i].line_id == line_id)
+            return 1;
+    }
+    return 0;
+}
+
+int metro_append_line_stops(const char *filename, uint16_t line_id, uint16_t order_index, uint16_t station_id)
+{
+    if (!filename || !line_id || !order_index || !station_id)
+        return -1;
+
+    LineStop *line_stops = NULL;
+    size_t n = 0;
+
+    if (metro_read_line_stops(filename, &line_stops, n) < 0)
+        return -1;
+
+    if (metro_line_order_taken(line_stops, n, line_id, order_index))
+    {
+        metro_free_line_stops(line_stops);
+        return 0;
+    }
+
+    FILE *f = fopen(filename, "a+");
+    if (!f)
+    {
+        metro_free_line_stops(line_stops);
+        return -1;
+    }
+
+    if (utils_write_header(f, "line_id\torder_index\tstation_id") != 0)
+    {
+        fclose(f);
+        metro_free_line_stops(line_stops);
+        return -1;
+    }
+    int ok = fprintf(f, "%" PRIu16 "\t%" PRIu16 "\t%" PRIu16 "\n",
+                     line_id, order_index, station_id) >= 0;
+    fclose(f);
+    metro_free_line_stops(line_stops);
+    return ok ? 0 : -1;
+}
