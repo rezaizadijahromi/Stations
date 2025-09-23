@@ -426,3 +426,80 @@ int metro_append_line_stops(const char *filename, uint16_t line_id, uint16_t ord
     metro_free_line_stops(line_stops);
     return ok ? 0 : -1;
 }
+
+int metro_append_line_stop_next(const char *file, const LineStop *stops, size_t nstops, uint16_t line_id, uint16_t station_id, uint16_t *out_order_index)
+{
+    if (!file || !stops || nstops || line_id || station_id || out_order_index)
+        return -1;
+
+    uint16_t max = 0;
+    int founded = 0;
+    for (size_t i = 0; i < nstops; i++)
+    {
+        if (stops[i].line_id == line_id)
+        {
+            if (!founded || stops[i].order_id > max)
+                max = stops[i].order_id;
+            founded = 1;
+        }
+    }
+
+    uint16_t next = founded ? (uint16_t)(max + 1u) : 0u;
+
+    int rc = metro_append_line_stop(file, line_id, next, station_id);
+    if (rc == 0 && out_order_index)
+        *out_order_index = next;
+    return rc;
+}
+
+int metro_get_line_station_ids(const LineStop *stops, size_t nstops, uint16_t line_id, uint16_t **out_ids, size_t *out_n)
+{
+    if (!out_ids || !out_n)
+        return -1;
+    *out_ids = NULL;
+    *out_n = 0;
+
+    size_t cnt = 0;
+    for (size_t i = 0; i < nstops; ++i)
+        if (stops[i].line_id == line_id)
+            cnt++;
+
+    if (cnt == 0)
+        return 0;
+
+    LineStop *tmp = (LineStop *)malloc(cnt * sizeof *tmp);
+    if (!tmp)
+        return -2;
+
+    size_t j = 0;
+    for (size_t i = 0; i < nstops; ++i)
+        if (stops[i].line_id == line_id)
+            tmp[j++] = stops[i];
+
+    for (size_t a = 1; a < cnt; ++a)
+    {
+        LineStop key = tmp[a];
+        size_t b = a;
+        while (b > 0 && tmp[b - 1].order_id > key.order_id)
+        {
+            tmp[b] = tmp[b - 1];
+            b--;
+        }
+        tmp[b] = key;
+    }
+
+    uint16_t *ids = (uint16_t *)malloc(cnt * sizeof *ids);
+    if (!ids)
+    {
+        free(tmp);
+        return -3;
+    }
+
+    for (size_t k = 0; k < cnt; ++k)
+        ids[k] = tmp[k].station_id;
+
+    free(tmp);
+    *out_ids = ids;
+    *out_n = cnt;
+    return 0;
+}

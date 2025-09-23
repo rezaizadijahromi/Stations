@@ -42,5 +42,7 @@ void metro_free_line_stops(LineStop *p);
 int metro_read_line_stops(const char *filename, LineStop **out_arr, size_t *out_size);
 int metro_append_line_stops(const char *filename, uint16_t line_id, uint16_t order_index, uint16_t station_id);
 int metro_line_order_taken(const LineStop *stops, size_t n, uint16_t line_id, uint16_t order_index);
+int metro_append_line_stop_next(const char *file, const LineStop *stops, size_t nstops, uint16_t line_id, uint16_t station_id, uint16_t *out_order_index);
+int metro_get_line_station_ids(const LineStop *stops, size_t nstops, uint16_t line_id, uint16_t **out_ids, size_t *out_n);
 
 #endif
