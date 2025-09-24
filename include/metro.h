@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <stdlib.h>
 
 #define STATION_NAME_MAX 100
 #define LINE_NAME_MAX 20

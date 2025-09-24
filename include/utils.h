@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "metro.h"
 

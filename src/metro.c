@@ -525,7 +525,7 @@ int metro_append_line_stop_next(const char *file, const LineStop *stops, size_t 
 
     uint16_t next = founded ? (uint16_t)(max + 1u) : 0u;
 
-    int rc = metro_append_line_stop(file, line_id, next, station_id);
+    int rc = metro_append_line_stops(file, line_id, next, station_id);
     if (rc == 0 && out_order_index)
         *out_order_index = next;
     return rc;

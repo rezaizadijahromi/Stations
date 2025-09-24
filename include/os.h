@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdlib.h>
 
 typedef void (*OsTaskFn)(void *ctx);
 typedef struct
