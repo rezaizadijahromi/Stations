@@ -6,6 +6,7 @@ static int append_route(const char *stations_file,
                         uint16_t line_id,
                         const char *const station_names[], size_t count)
 {
+
     LineStop *stops = NULL;
     size_t nstops = 0;
     if (metro_read_line_stops(line_stops_file, &stops, &nstops) < 0)
@@ -24,6 +25,7 @@ static int append_route(const char *stations_file,
             metro_free_line_stops(stops);
             return -1;
         }
+
         LineStop ls = {.line_id = line_id, .order_id = (uint16_t)0, .station_id = sid};
         (void)ls;
         nstops++;
@@ -49,12 +51,11 @@ int seed_green_line_all(const char *lines_file,
 
     if (metro_ensure_line(lines_file, "M2 Gessate \xE2\x86\x92 Famagosta", &lid_gessate) != 0)
         return -1;
+
     if (append_route(stations_file, line_stops_file, lid_gessate,
                      M2_GESSATE_TO_FAMAGOSTA,
                      sizeof M2_GESSATE_TO_FAMAGOSTA / sizeof M2_GESSATE_TO_FAMAGOSTA[0]) != 0)
         return -1;
-
-    return -1;
 
     return 0;
 }

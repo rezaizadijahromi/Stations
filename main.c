@@ -13,13 +13,11 @@ int main(void)
     const char *STAS = "stations.tsv";
     const char *STOPS = "line_stops.tsv";
 
-    if (seed_green_line_all(LINES, STAS, STOPS) != 0)
-    {
-        fprintf(stderr, "Failed to seed M2\n");
-        return 1;
-    }
+    int code = seed_green_line_all(LINES, STAS, STOPS);
 
-    //    Train t1 = {.id = 1, .index = 0};
+    printf("%d", code);
+
+        //    Train t1 = {.id = 1, .index = 0};
     //    Train t2 = {.id = 2, .index = 0};
     //    Train t3 = {.id = 3, .index = 0};
     //

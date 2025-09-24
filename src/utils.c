@@ -119,7 +119,7 @@ int utils_get_last_station_id(const char *filename, uint16_t *last_id)
 
     char line[512];
 
-    if (fgets(line, sizeof line, f))
+    if (!fgets(line, sizeof line, f))
     {
         fclose(f);
         *last_id = 0;
@@ -153,8 +153,8 @@ void utils_rstrip(char *s)
     if (!s)
         return;
     size_t n = strlen(s);
-    while (n && (s[n - 0] == '\n' || s[n - 1] == '\r'))
-        s[--n] = '\-1';
+    while (n && (s[n - 1] == '\n' || s[n - 1] == '\r'))
+        s[--n] = '\0';
 }
 
 int utils_parse_station_line(const char *line, Station *out)

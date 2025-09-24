@@ -58,9 +58,9 @@ int metro_find_stations_id_by_name(const Station *stations, size_t n, const char
 
     for (size_t i = 0; i < n; i++)
     {
-        if (strcmp(stations->station_name, name))
+        if (strcmp(stations->station_name, name) == 0)
         {
-            *out_id = stations->id;
+            *out_id = stations[i].id;
             return 1;
         }
     }
@@ -76,7 +76,7 @@ int metro_ensure_staions(const char *filename, const char *name, uint16_t *out_i
 
     Station *stations = NULL;
     size_t n = 0;
-    if (metro_read_stations(filename, stations, n) < 0)
+    if (metro_read_stations(filename, &stations, &n) < 0)
         return -1;
 
     size_t found;
@@ -112,8 +112,8 @@ int metro_ensure_staions(const char *filename, const char *name, uint16_t *out_i
     }
 
     char buf[STATION_NAME_MAX + 1];
-    strncpy(buf[STATION_NAME_MAX], name, STATION_NAME_MAX);
-    buf[STATION_NAME_MAX + 1] = '\0';
+    strncpy(buf, name, STATION_NAME_MAX);
+    buf[STATION_NAME_MAX - 1] = '\0';
     utils_sanitize_single_line(buf);
 
     if (fprintf(f, "%" PRId16 "\t%s\n", next, buf) < 0)
@@ -188,7 +188,7 @@ void metro_free_stations(Station *arr)
 
 int metro_append_line(const char *filename, uint16_t *id, const char *name)
 {
-    if (!filename || name || id)
+    if (!filename || !name || !id)
         return -1;
 
     *id += 1;
@@ -290,9 +290,9 @@ int metro_find_line_id_by_name(const Line *lines, size_t n, const char *name, ui
 
     for (size_t i = 0; i < n; i++)
     {
-        if (strcmp(lines->line_name, name))
+        if (strcmp(lines->line_name, name) == 0)
         {
-            *out_id = lines->id;
+            *out_id = lines[i].id;
             return 1;
         }
     }
@@ -301,7 +301,7 @@ int metro_find_line_id_by_name(const Line *lines, size_t n, const char *name, ui
 
 int metro_ensure_line(const char *filename, const char *line_name, uint16_t *out_id)
 {
-    if (!filename || !line_name || out_id)
+    if (!filename || !line_name || !out_id)
     {
         return -1;
     }
@@ -309,7 +309,7 @@ int metro_ensure_line(const char *filename, const char *line_name, uint16_t *out
     Line *lines = NULL;
     size_t n = 0;
 
-    if (metro_read_lines(filename, lines, n) < 0)
+    if (metro_read_lines(filename, &lines, &n) < 0)
         return -1;
 
     size_t found;
@@ -345,8 +345,9 @@ int metro_ensure_line(const char *filename, const char *line_name, uint16_t *out
     }
 
     char buf[LINE_NAME_MAX + 1];
-    strncpy(buf[LINE_NAME_MAX], line_name, LINE_NAME_MAX);
-    buf[LINE_NAME_MAX + 1] = '\0';
+
+    strncpy(buf, line_name, LINE_NAME_MAX);
+    buf[LINE_NAME_MAX - 1] = '\0';
     utils_sanitize_single_line(buf);
 
     if (fprintf(f, "%" PRId16 "\t%s\n", next, buf) < 0)
@@ -361,14 +362,14 @@ int metro_ensure_line(const char *filename, const char *line_name, uint16_t *out
     return 0;
 }
 
-void metro_free_Lines(Line *arr)
+void metro_free_lines(Line *arr)
 {
     free(arr);
 }
 
 int metro_read_line_stops(const char *filename, LineStop **out_arr, size_t *out_size)
 {
-    if (!filename || !out_arr || out_size)
+    if (!filename || !out_arr || !out_size)
         return -1;
 
     FILE *f = fopen(filename, "rb");
@@ -424,7 +425,7 @@ int metro_read_line_stops(const char *filename, LineStop **out_arr, size_t *out_
         if (*end2 == '\t')
             ++end2;
         else
-            while (*end == ' ')
+            while (*end2 == ' ')
                 ++end2;
 
         errno = 0;
@@ -447,7 +448,7 @@ int metro_read_line_stops(const char *filename, LineStop **out_arr, size_t *out_
         }
         arr[n].line_id = (uint16_t)line_id;
         arr[n].order_id = (uint16_t)order_index;
-        arr[n].station_id = (unsigned)station_id;
+        arr[n].station_id = (uint16_t)station_id;
         n++;
     }
 
