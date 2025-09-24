@@ -49,6 +49,85 @@ int metro_append_station(const char *filename, uint16_t *id, const char *name)
     return 0;
 }
 
+int metro_find_stations_id_by_name(const Station *stations, size_t n, const char *name, uint16_t *out_id)
+{
+    if (!stations || !n || !name || !out_id)
+    {
+        return -1;
+    }
+
+    for (size_t i = 0; i < n; i++)
+    {
+        if (strcmp(stations->station_name, name))
+        {
+            *out_id = stations->id;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int metro_ensure_staions(const char *filename, const char *name, uint16_t *out_id)
+{
+    if (!filename || !name || !out_id)
+    {
+        return -1;
+    }
+
+    Station *stations = NULL;
+    size_t n = 0;
+    if (metro_read_stations(filename, stations, n) < 0)
+        return -1;
+
+    size_t found;
+    if (metro_find_stations_id_by_name(stations, n, name, &found))
+    {
+        *out_id = found;
+        free(stations);
+        return 0;
+    }
+
+    uint16_t maxid = 0;
+    for (size_t i = 0; i < n; i++)
+    {
+        if (stations[i].id > maxid)
+            maxid = stations[i].id;
+    }
+
+    uint16_t next = maxid + 1;
+    if (next > 0xFFFFu)
+        return -1;
+
+    FILE *f = fopen(filename, "a+");
+    if (!f)
+    {
+        free(stations);
+        return -1;
+    }
+
+    if (utils_write_header(f, "id\tstation_name") != 0)
+    {
+        free(stations);
+        return -1;
+    }
+
+    char buf[STATION_NAME_MAX + 1];
+    strncpy(buf[STATION_NAME_MAX], name, STATION_NAME_MAX);
+    buf[STATION_NAME_MAX + 1] = '\0';
+    utils_sanitize_single_line(buf);
+
+    if (fprintf(f, "%" PRId16 "\t%s\n", next, buf) < 0)
+    {
+        fclose(f);
+        free(stations);
+        return -1;
+    }
+
+    *out_id = next;
+    free(stations);
+    return 0;
+}
+
 int metro_read_stations(const char *filename, Station **out_arr, size_t *out_count)
 {
     if (!filename || !out_arr || !out_count)
