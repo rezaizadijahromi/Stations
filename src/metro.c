@@ -44,7 +44,7 @@ int metro_append_station(const char *filename, uint16_t *id, const char *name)
     buf[i] = '\0';
     utils_sanitize_single_line(buf);
 
-    if (fprintf(f, "%" PRIu16 "\t%s\n", (uint16_t)*id, buf) < 0)
+    if (fprintf(f, "%" PRIu16 "\t%s\n", (unsigned)*id, buf) < 0)
     {
         fclose(f);
         return -5;
@@ -61,8 +61,6 @@ int metro_find_stations_id_by_name(const Station *stations, size_t n, const char
     {
         return -1;
     }
-
-    *out_id = 0;
 
     for (size_t i = 0; i < n; i++)
     {
@@ -121,7 +119,7 @@ int metro_ensure_stations(const char *filename, const char *name, uint16_t *out_
 
     char buf[STATION_NAME_MAX + 1];
     strncpy(buf, name, STATION_NAME_MAX);
-    buf[STATION_NAME_MAX - 1] = '\0';
+    buf[STATION_NAME_MAX] = '\0';
     utils_sanitize_single_line(buf);
 
     if (fprintf(f, "%" PRIu16 "\t%s\n", next, buf) < 0)
@@ -228,7 +226,7 @@ int metro_append_line(const char *filename, uint16_t *id, const char *name)
 
     buf[i] = '\0';
     utils_sanitize_single_line(buf);
-    if (fprintf(f, "%" PRIu16 "\t%s\n", (uint16_t)*id, buf) < 0)
+    if (fprintf(f, "%" PRIu16 "\t%s\n", (unsigned)*id, buf) < 0)
     {
         fclose(f);
         return -1;
@@ -295,8 +293,6 @@ int metro_find_line_id_by_name(const Line *lines, size_t n, const char *name, ui
 {
     if (!lines || !n || !name || !out_id)
         return -1;
-
-    *out_id = 0;
 
     for (size_t i = 0; i < n; i++)
     {
@@ -488,7 +484,7 @@ int metro_append_line_stops(const char *filename, uint16_t line_id, uint16_t ord
     LineStop *line_stops = NULL;
     size_t n = 0;
 
-    if (metro_read_line_stops(filename, &line_stops, &n) < 0)
+    if (metro_read_line_stops(filename, &line_stops, n) < 0)
         return -1;
 
     if (metro_line_order_taken(line_stops, n, line_id, order_index))
@@ -519,7 +515,7 @@ int metro_append_line_stops(const char *filename, uint16_t line_id, uint16_t ord
 
 int metro_append_line_stop_next(const char *file, const LineStop *stops, size_t nstops, uint16_t line_id, uint16_t station_id, uint16_t *out_order_index)
 {
-    if (!file || !out_order_index)
+    if (!file)
         return -1;
 
     uint16_t max = 0;
