@@ -2,7 +2,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
-static void sleep_seconds(unsigned s) { Sleep{s * 1000u}; }
+static void sleep_seconds(unsigned s) { Sleep(s * 1000u); }
 #else
 #include <time.h>
 static void sleep_seconds(unsigned s)
