@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 #define STATION_NAME_MAX 100
-#define LINE_NAME_MAX 20
+#define LINE_NAME_MAX 100
 
 typedef struct
 {

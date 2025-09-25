@@ -226,7 +226,7 @@ int metro_append_line(const char *filename, uint16_t *id, const char *name)
 
     buf[i] = '\0';
     utils_sanitize_single_line(buf);
-    if (fprintf(f, "%" PRIu16 "\t%s\n", (unsigned)*id, buf) < 0)
+    if (fprintf(f, "%" PRIu16 "\t%s\n", (uint16_t)*id, buf) < 0)
     {
         fclose(f);
         return -1;
@@ -515,7 +515,7 @@ int metro_append_line_stops(const char *filename, uint16_t line_id, uint16_t ord
 
 int metro_append_line_stop_next(const char *file, const LineStop *stops, size_t nstops, uint16_t line_id, uint16_t station_id, uint16_t *out_order_index)
 {
-    if (!file)
+    if (!file || !stops || !out_order_index)
         return -1;
 
     uint16_t max = 0;
