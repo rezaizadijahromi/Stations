@@ -15,9 +15,9 @@ int main(void)
 
     int code = seed_green_line_all(LINES, STAS, STOPS);
 
-    printf("%d", code);
+    printf("\n%d\n", code);
 
-        //    Train t1 = {.id = 1, .index = 0};
+    //    Train t1 = {.id = 1, .index = 0};
     //    Train t2 = {.id = 2, .index = 0};
     //    Train t3 = {.id = 3, .index = 0};
     //

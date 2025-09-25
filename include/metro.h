@@ -31,7 +31,7 @@ typedef struct
 
 int metro_append_station(const char *filename, uint16_t *id, const char *name);
 int metro_find_stations_id_by_name(const Station *stations, size_t n, const char *name, uint16_t *out_id);
-int metro_ensure_staions(const char *filename, const char *name, uint16_t *id);
+int metro_ensure_stations(const char *filename, const char *name, uint16_t *id);
 int metro_read_stations(const char *filename, Station **out_arr, size_t *out_size);
 void metro_free_stations(Station *arr);
 

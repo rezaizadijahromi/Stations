@@ -15,7 +15,7 @@ static int append_route(const char *stations_file,
     for (size_t i = 0; i < count; ++i)
     {
         uint16_t sid = 0;
-        if (metro_ensure_staions(stations_file, station_names[i], &sid) != 0)
+        if (metro_ensure_stations(stations_file, station_names[i], &sid) != 0)
         {
             metro_free_line_stops(stops);
             return -1;
