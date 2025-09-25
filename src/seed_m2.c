@@ -20,14 +20,23 @@ static int append_route(const char *stations_file,
             metro_free_line_stops(stops);
             return -1;
         }
-        if (metro_append_line_stop_next(line_stops_file, stops, nstops, line_id, sid, NULL) != 0)
+        uint16_t ord = 0;
+        if (metro_append_line_stop_next(line_stops_file, stops, nstops, line_id, sid, &ord) != 0)
         {
             metro_free_line_stops(stops);
             return -1;
         }
 
-        LineStop ls = {.line_id = line_id, .order_id = (uint16_t)0, .station_id = sid};
-        (void)ls;
+        LineStop *tmp = realloc(stops, (nstops + 1) * sizeof *tmp);
+        if (!tmp)
+        {
+            metro_free_line_stops(stops);
+            return -1;
+        }
+        stops = tmp;
+        stops[nstops].line_id = line_id;
+        stops[nstops].order_id = ord;
+        stops[nstops].station_id = sid;
         nstops++;
     }
     metro_free_line_stops(stops);

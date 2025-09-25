@@ -484,7 +484,7 @@ int metro_append_line_stops(const char *filename, uint16_t line_id, uint16_t ord
     LineStop *line_stops = NULL;
     size_t n = 0;
 
-    if (metro_read_line_stops(filename, &line_stops, n) < 0)
+    if (metro_read_line_stops(filename, &line_stops, &n) < 0)
         return -1;
 
     if (metro_line_order_taken(line_stops, n, line_id, order_index))
@@ -515,7 +515,7 @@ int metro_append_line_stops(const char *filename, uint16_t line_id, uint16_t ord
 
 int metro_append_line_stop_next(const char *file, const LineStop *stops, size_t nstops, uint16_t line_id, uint16_t station_id, uint16_t *out_order_index)
 {
-    if (!file || !stops || !out_order_index)
+    if (!file)
         return -1;
 
     uint16_t max = 0;
