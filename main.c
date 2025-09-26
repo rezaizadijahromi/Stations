@@ -13,9 +13,10 @@ int main(void)
     const char *STAS = "stations.tsv";
     const char *STOPS = "line_stops.tsv";
 
-    int code = seed_green_line_all(LINES, STAS, STOPS);
-
-    printf("\n%d\n", code);
+    if (seed_green_line_all(LINES, STAS, STOPS) < 0)
+    {
+        perror("Something went wrong in seed green");
+    }
 
     //    Train t1 = {.id = 1, .index = 0};
     //    Train t2 = {.id = 2, .index = 0};
