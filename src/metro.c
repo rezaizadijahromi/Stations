@@ -9,11 +9,6 @@ int metro_append_station(const char *filename, uint16_t *id, const char *name)
     // TODO: Create a function for this
     *id = *id + 1;
 
-    if (!utils_has_file_in_dir(".", filename))
-    {
-        perror("We don't have the file and we have to create a new file");
-    }
-
     FILE *f = fopen(filename, "a+");
 
     if (!f)

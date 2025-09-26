@@ -1,7 +1,5 @@
 #include "../include/train.h"
 
-pthread_mutex_t g_print_mx = PTHREAD_MUTEX_INITIALIZER;
-
 #ifdef _WIN32
 #include <windows.h>
 static void sleep_seconds(unsigned s) { Sleep(s * 1000u); }

@@ -26,7 +26,7 @@ typedef struct
     int loop; // wrap around, 0 = stop at end
 } trainCtx;
 
-static pthread_mutex_t g_print_mx;
+static pthread_mutex_t g_print_mx = PTHREAD_MUTEX_INITIALIZER;
 
 static inline void
 train_start(Train *t, uint16_t id)
