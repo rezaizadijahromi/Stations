@@ -57,10 +57,10 @@ int metro_append_station(const char *filename, uint16_t *id, const char *name)
 
 int metro_find_stations_id_by_name(const Station *stations, size_t n, const char *name, uint16_t *out_id)
 {
-    if (!stations || !n || !name || !out_id)
-    {
+    if (!name || !out_id)
         return -1;
-    }
+    if (!stations && n != 0)
+        return -1;
 
     for (size_t i = 0; i < n; i++)
     {
@@ -129,6 +129,7 @@ int metro_ensure_stations(const char *filename, const char *name, uint16_t *out_
         return -1;
     }
 
+    fclose(f);
     *out_id = next;
     free(stations);
     return 0;
