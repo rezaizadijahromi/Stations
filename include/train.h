@@ -10,21 +10,23 @@
 typedef struct
 {
     uint16_t id;
+    uint16_t line_id;
     size_t index;
+    int dir; // forward or backward
 } Train;
 
 typedef struct
 {
+    const uint16_t *route_ids; // station_ids
+    size_t route_len;
+    const Station *stations;
+    size_t stations_n;
     Train *t;
-    const Station *route;
-    size_t n; // Number of stations
     unsigned period_ms;
-    size_t starting_index;
-    int loop; // 0 = stop
-    int *done_flag;
-} TrainCtx;
+    int loop; // wrap around, 0 = stop at end
+} trainCtx;
 
-static pthread_mutex_t g_print_mx = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_print_mx;
 
 static inline void
 train_start(Train *t, uint16_t id)
@@ -44,4 +46,12 @@ void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds);
 // Tasks
 void train_task(void *ctx_v);
 int train_stop_when_done(void *p);
-void *train_thread(void *args);
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+    void *train_thread(void *args);
+#ifdef __cplusplus
+}
+#endif

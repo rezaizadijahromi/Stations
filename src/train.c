@@ -1,5 +1,7 @@
 #include "../include/train.h"
 
+pthread_mutex_t g_print_mx = PTHREAD_MUTEX_INITIALIZER;
+
 #ifdef _WIN32
 #include <windows.h>
 static void sleep_seconds(unsigned s) { Sleep(s * 1000u); }
@@ -12,6 +14,74 @@ static void sleep_seconds(unsigned s)
 }
 #endif
 
+static const Station *by_id(const Station *arr, size_t n, uint16_t id)
+{
+    for (size_t i = 0; i < n; i++)
+    {
+        if (arr[i].id == id)
+            return &arr[i];
+    }
+    return NULL;
+}
+
+void *train_thread(void *arg)
+{
+    trainCtx *ctx = (trainCtx *)arg;
+    if (!ctx || !ctx->t || !ctx->route_ids || ctx->route_len == 0)
+        return 0;
+
+    if (ctx->t->index >= ctx->route_len)
+        ctx->t->index = 0;
+    if (ctx->t->dir != -1 && ctx->t->dir != 1)
+        ctx->t->dir = 1;
+
+    for (;;)
+    {
+        uint16_t sid = ctx->route_ids[ctx->t->index]; // get station id
+        const Station *s = by_id(ctx->stations, ctx->stations_n, sid);
+
+        pthread_mutex_lock(&g_print_mx);
+        printf("[ Train %u | line %u] at: %s (station_id=%u, idx=%u)\n", (unsigned)ctx->t->id, (unsigned)ctx->t->line_id, s ? s->station_name : "<?>", (unsigned)sid, ctx->t->index);
+
+        fflush(stdout);
+        pthread_mutex_unlock(&g_print_mx);
+
+        // we have to use seconds
+        sleep_seconds(ctx->period_ms);
+
+        if (ctx->t->dir > 0)
+        {
+            if (ctx->t->index + 1 < ctx->route_len)
+            {
+                ctx->t->index++;
+            }
+            else
+            {
+                if (ctx->loop)
+                    ctx->t->index = 0;
+                else
+                    break;
+            }
+        }
+        else
+        {
+            if (ctx->t->index > 0)
+            {
+                ctx->t->index;
+            }
+            else
+            {
+                if (ctx->loop)
+                    ctx->t->index = ctx->route_len - 1;
+                else
+                    break;
+            }
+        }
+    }
+
+    return NULL;
+}
+
 int train_move_next(Train *t, size_t n)
 {
     if (t->index + 1 < n)
@@ -20,27 +90,6 @@ int train_move_next(Train *t, size_t n)
         return 1;
     }
     return 0;
-}
-
-void train_task(void *ctx_v)
-{
-    TrainCtx *ctx = (TrainCtx *)ctx_v;
-
-    if (ctx->t->index >= ctx->n)
-    {
-        *(ctx->done_flag) = 1;
-        return;
-    }
-
-    const Station *s = &ctx->route[ctx->t->index];
-    printf("Train %u at: %s (station id=%u)\n", (unsigned)ctx->t->id, s->station_name, (unsigned)s->id);
-
-    ctx->t->index++;
-
-    if (ctx->t->index >= ctx->n)
-    {
-        *(ctx->done_flag) = 1;
-    }
 }
 
 void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds)
@@ -63,35 +112,3 @@ void train_run_route(Train *t, const Station *rout, size_t n, unsigned seconds)
 }
 
 int train_stop_when_done(void *p) { return *(int *)p; }
-
-void *train_thread(void *args)
-{
-    TrainCtx *ctx = (TrainCtx *)args;
-    if (ctx->n == 0)
-        return NULL;
-
-    ctx->t->index = (ctx->starting_index < ctx->n) ? ctx->starting_index : 0;
-
-    do
-    {
-        pthread_mutex_lock(&g_print_mx);
-        const Station *s = &ctx->route[ctx->t->index];
-        printf("Train %u at: %s (station id=%u, index=%zu)\n", (unsigned)ctx->t->id, s->station_name, (unsigned)s->id, ctx->t->index);
-
-        fflush(stdout);
-        pthread_mutex_unlock(&g_print_mx);
-
-        sleep_seconds(ctx->period_ms);
-
-        ctx->t->index++;
-        if (ctx->t->index >= ctx->n)
-        {
-            if (ctx->loop)
-                ctx->t->index = 0;
-            else
-                break;
-        }
-    } while (1);
-
-    return NULL;
-}
