@@ -253,3 +253,37 @@ int utils_write_header(FILE *f, const char *header)
     }
     return 0;
 }
+
+int utils_normalize_name(const char *in, char *out, size_t outsz, int fold_case)
+{
+    if (!in || !out || outsz == 0)
+        return -1;
+
+    size_t w = 0;
+    int last_space = 1;
+    for (const unsigned char *p = (const unsigned char *)in; *p; p++)
+    {
+        unsigned char c = *p;
+        if (c == '\t' || c == '\r' || c == '\n')
+            c = ' ';
+        if (c == ' ')
+        {
+            if (last_space)
+                continue;
+            last_space = 1;
+        }
+        else
+        {
+            last_space = 0;
+            if (fold_case)
+                c = (unsigned char)tolower(c);
+        }
+        if (w + 1 < outsz)
+            out[w++] = (char)c;
+    }
+
+    while (w && out[w - 1] == ' ')
+        --w;
+    out[w] = '\0';
+    return 0;
+}

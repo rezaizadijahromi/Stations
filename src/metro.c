@@ -6,7 +6,6 @@ int metro_append_station(const char *filename, uint16_t *id, const char *name)
     if (!filename || !name || !id)
         return -1;
 
-    // TODO: Create a function for this
     *id = *id + 1;
 
     FILE *f = fopen(filename, "a+");
@@ -57,9 +56,15 @@ int metro_find_stations_id_by_name(const Station *stations, size_t n, const char
     if (!stations && n != 0)
         return -1;
 
+    char key[STATION_NAME_MAX + 1];
+    if (utils_normalize_name(name, key, sizeof key, 1) != 0)
+        return -1;
+
     for (size_t i = 0; i < n; i++)
     {
-        if (strcmp(stations[i].station_name, name) == 0)
+        char got[STATION_NAME_MAX + 1];
+        utils_normalize_name(stations[i].station_name, got, sizeof got, 1);
+        if (strcmp(got, key) == 0)
         {
             *out_id = stations[i].id;
             return 1;
@@ -116,9 +121,7 @@ int metro_ensure_stations(const char *filename, const char *name, uint16_t *out_
     }
 
     char buf[STATION_NAME_MAX + 1];
-    strncpy(buf, name, STATION_NAME_MAX);
-    buf[STATION_NAME_MAX] = '\0';
-    utils_sanitize_single_line(buf);
+    utils_normalize_name(name, buf, sizeof buf, 1);
 
     if (fprintf(f, "%" PRIu16 "\t%s\n", next, buf) < 0)
     {
@@ -290,14 +293,20 @@ int metro_read_lines(const char *filename, Line **out_arr, size_t *out_count)
 
 int metro_find_line_id_by_name(const Line *lines, size_t n, const char *name, uint16_t *out_id)
 {
-    if (!lines || !out_id)
+    if (!name || !out_id)
         return -1;
     if (!lines && n != 0)
         return -1;
 
+    char key[LINE_NAME_MAX + 1];
+    if (utils_normalize_name(name, key, sizeof key, 1) != 0)
+        return -1;
+
     for (size_t i = 0; i < n; i++)
     {
-        if (strcmp(lines[i].line_name, name) == 0)
+        char got[LINE_NAME_MAX + 1];
+        utils_normalize_name(lines[i].line_name, got, sizeof got, 1);
+        if (strcmp(got, key) == 0)
         {
             *out_id = lines[i].id;
             return 1;
@@ -352,10 +361,7 @@ int metro_ensure_line(const char *filename, const char *line_name, uint16_t *out
     }
 
     char buf[LINE_NAME_MAX + 1];
-
-    strncpy(buf, line_name, LINE_NAME_MAX);
-    buf[LINE_NAME_MAX - 1] = '\0';
-    utils_sanitize_single_line(buf);
+    utils_normalize_name(line_name, buf, sizeof buf, 1);
 
     if (fprintf(f, "%" PRIu16 "\t%s\n", next, buf) < 0)
     {

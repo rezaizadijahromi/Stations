@@ -3,9 +3,6 @@
 #include "./include/os.h"
 #include "./include/seed_m2.h"
 
-// #include <stdio.h>
-// #include <stdlib.h>
-
 int main(void)
 {
 
